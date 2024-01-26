@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Grade</title>
+    <style>
+     * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+.container {
+    width: 50%;
+}
+
+label {
+    display: block;
+    margin-top: 10px;
+    color: #4CAF50;
+}
+
+select, input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #4CAF50;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #4CAF50;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+    </style>
+</head>
+<body>
+    <h2>New Grade</h2>
+
+    <div>
+        <label for="studentDropdown">Select Student:</label>
+        <select id="studentDropdown"></select>
+    </div>
+
+    <div>
+        <label for="lessonDropdown">Select Lesson:</label>
+        <select id="lessonDropdown"></select>
+    </div>
+
+    <div>
+        <label for="gradeInput">Enter Grade:</label>
+        <input type="number" step="0.1" id="gradeInput" min="0" max="6" required>
+    </div>
+
+    <div>
+        <button onclick="submitGrade()">Submit Grade</button>
+    </div>
+    <!-- DATA_PLACEHOLDER -->
+    <script>
+        // Accessing data from the injected JSON
+        const students = data.students;
+        const lessons = data.lessons;
+
+        // Populate student and lesson dropdowns
+        const studentDropdown = document.getElementById('studentDropdown');
+        const lessonDropdown = document.getElementById('lessonDropdown');
+
+        students.forEach(student => {
+            const option = document.createElement('option');
+            option.value = student.userID; // Use userID as the value
+            option.text = `${student.name} ${student.surname}`;
+            studentDropdown.add(option);
+        });
+
+        lessons.forEach(lesson => {
+            const option = document.createElement('option');
+            option.value = lesson.lessonID; // Use lessonID as the value
+            option.text = lesson.lesson;
+            lessonDropdown.add(option);
+        });
+
+        // Function to submit the grade
+        function submitGrade() {
+            const selectedStudentID = studentDropdown.value;
+            const selectedLessonID = lessonDropdown.value;
+            const grade = parseFloat(document.getElementById('gradeInput').value);
+
+            // Check if the grade is within the valid range (0 to 6.0)
+            if (grade >= 0 && grade <= 6.0) {
+                // Implement the logic to submit the grade
+                fetch('/admin/submitGrade', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ studentID: selectedStudentID, lessonID: selectedLessonID, grade }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Grade submitted successfully');
+                        // Redirect or perform any other action as needed
+                    } else {
+                        console.error('Error submitting grade:', data.message);
+                        // Handle error, e.g., show an alert to the user
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting grade:', error);
+                    // Handle error, e.g., show an alert to the user
+                });
+            } else {
+                alert('Invalid grade. Please enter a value between 0 and 6.0.');
+            }
+        }
+    </script>
+</body>
+</html>

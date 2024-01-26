@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Grades</title>
+    <style>
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+}
+
+#content-container {
+    display: flex;
+}
+
+#sidebar {
+    width: 139px;
+    height: fit-content;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: #333;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 123px;
+}
+
+#studentList {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    margin-bottom: 0px;
+}
+
+#studentList li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd; /* Add a bottom border for the table-like effect */
+    cursor: pointer;
+}
+
+#studentList li:hover {
+    background-color: #f0f0f0; /* Background color on hover */
+}
+
+#studentList li span {
+    flex: 1;
+    margin-right: 10px;
+}
+
+#studentList li:last-child {
+    border-bottom: none; /* Remove the bottom border from the last li to avoid double lines */
+}
+
+
+/* Main content styles */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    padding: 20px;
+    width: 90%; /* Adjusted width to be wider */
+    max-width: 800px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.add-grade-button {
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #4CAF50; /* Green color */
+    color: white;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.add-grade-button:hover {
+    background-color: #45a049; /* Darker green color on hover */
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.edit-button, .delete-button {
+    cursor: pointer;
+    text-decoration: none;
+    margin-right: 10px;
+    font-size: 14px;
+    text-align: center;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.edit-button:hover, .delete-button:hover {
+    opacity: 0.8;
+}
+
+.edit-button {
+    background-color: #3498db; /* Blue color */
+    color: white;
+}
+
+.delete-button {
+    background-color: #e74c3c; /* Red color */
+    color: white;
+}
+
+/* Adjustments for the select in the sidebar and padding for "All Jobs" and "All Lessons" */
+select {
+    padding: 8px; /* Added padding */
+}
+/* Adjustments for the select in the sidebar and padding for "All Jobs" and "All Lessons" */
+#sidebar select {
+    width: 100%;
+}
+
+    </style>
+    </head>
+    <body>
+        <div id="content-container">
+            <div id="sidebar">
+                <h2>Students</h2>
+                <label for="jobFilterStudent">Filter by Job:</label>
+                <select id="jobFilterStudent" onchange="filterStudentsByJob()">
+                    <option value="">All Jobs</option>
+                    <!-- Add job options dynamically using JavaScript -->
+                </select>
+                <ul id="studentList"></ul>
+            </div>
+    
+            <div class="main-content">
+                <h2>Admin Grades</h2>
+                <!-- Add Grade Button -->
+                <button class="add-grade-button" onclick="redirectToNewGradePage()">Add Grade</button>
+                <div class="container">
+                    <h2>Filters:</h2>
+                    <div class="filter-container">
+                        <select id="jobFilter" onchange="filterGrades()">
+                            <option value="">All Jobs</option>
+                            <!-- Add job options dynamically using JavaScript -->
+                        </select>
+    
+                        <select id="lessonFilter" onchange="filterGrades()">
+                            <option value="">All Lessons</option>
+                            <!-- Add lesson options dynamically using JavaScript -->
+                        </select>
+                    </div>
+    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Lesson</th>
+                                <th>Grade</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradesTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    
+        <!-- DATA_PLACEHOLDER -->
+    <script>
+        // Accessing data from the injected JSON
+        const user = data.user;
+        const grades = data.grades;
+
+        // Populate job and lesson filter dropdowns for admin grades
+        const jobFilterDropdown = document.getElementById('jobFilter');
+        const lessonFilterDropdown = document.getElementById('lessonFilter');
+
+        const uniqueJobs = [...new Set(grades.map(grade => grade.job))];
+        uniqueJobs.forEach(job => {
+            const option = document.createElement('option');
+            option.value = job;
+            option.text = job;
+            jobFilterDropdown.add(option);
+        });
+
+        const uniqueLessons = [...new Set(grades.map(grade => grade.lesson))];
+        uniqueLessons.forEach(lesson => {
+            const option = document.createElement('option');
+            option.value = lesson;
+            option.text = lesson;
+            lessonFilterDropdown.add(option);
+        });
+
+        // Populate job filter dropdown for students
+        const jobFilterStudentDropdown = document.getElementById('jobFilterStudent');
+        uniqueJobs.forEach(job => {
+            const option = document.createElement('option');
+            option.value = job;
+            option.text = job;
+            jobFilterStudentDropdown.add(option);
+        });
+
+        // Display students in the sidebar
+        const studentList = document.getElementById('studentList');
+        const uniqueStudents = [...new Set(grades.map(grade => `${grade.name} ${grade.surname}`))];
+        uniqueStudents.sort().forEach(student => {
+            const listItem = document.createElement('li');
+            listItem.textContent = student;
+            listItem.onclick = () => filterByStudent(student);
+            studentList.appendChild(listItem);
+        });
+
+        // Display grades in the table
+        const gradesTableBody = document.getElementById('gradesTableBody');
+        let displayedGrades = [...grades];  // Initially, displayed grades are the same as all grades
+
+        function renderTable() {
+            // Clear the existing table
+            gradesTableBody.innerHTML = '';
+
+            // Display filtered and sorted grades in the table
+            displayedGrades.forEach(grade => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${grade.name} ${grade.surname}</td><td>${grade.lesson}</td><td>${grade.grade}</td><td>${formatDate(grade.date)}</td><td><span class="edit-button" onclick="editGrade(${grade.gradeID})">Edit</span>  <span class="delete-button" onclick="confirmDelete(${grade.gradeID}, '${grade.name} ${grade.surname}', '${grade.lesson}', '${grade.grade}', '${formatDate(grade.date)}')">Delete</span></td>`;
+                gradesTableBody.appendChild(row);
+            });
+        }
+
+        // Function to filter grades based on job and lesson
+        function filterGrades() {
+            const selectedJob = jobFilterDropdown.value;
+            const selectedLesson = lessonFilterDropdown.value;
+
+            if (selectedJob || selectedLesson) {
+                displayedGrades = grades.filter(grade =>
+                    (!selectedJob || grade.job === selectedJob) &&
+                    (!selectedLesson || grade.lesson === selectedLesson)
+                );
+            } else {
+                displayedGrades = [...grades];
+            }
+
+            // Sort grades by date
+            displayedGrades.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            renderTable();
+        }
+
+        // Function to filter students based on job
+        function filterStudentsByJob() {
+            const selectedJob = jobFilterStudentDropdown.value;
+
+            if (selectedJob) {
+                const filteredStudents = uniqueStudents.filter(student => {
+                    const studentGrades = grades.filter(grade => `${grade.name} ${grade.surname}` === student);
+                    return studentGrades.some(grade => grade.job === selectedJob);
+                });
+
+                studentList.innerHTML = '';
+
+                filteredStudents.sort().forEach(student => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = student;
+                    listItem.onclick = () => filterByStudent(student);
+                    studentList.appendChild(listItem);
+                });
+            } else {
+                // If no job selected, display all students
+                studentList.innerHTML = '';
+
+                uniqueStudents.sort().forEach(student => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = student;
+                    listItem.onclick = () => filterByStudent(student);
+                    studentList.appendChild(listItem);
+                });
+            }
+        }
+
+        // Function to filter grades by student
+        function filterByStudent(student) {
+            jobFilterDropdown.value = ''; // Reset job filter when selecting a student
+            lessonFilterDropdown.value = ''; // Reset lesson filter when selecting a student
+
+            displayedGrades = grades.filter(grade =>
+                `${grade.name} ${grade.surname}` === student
+            );
+
+            // Sort grades by date
+            displayedGrades.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            renderTable();
+        }
+
+        // Function to confirm deletion
+        function confirmDelete(gradeID, studentName, lesson, grade, date) {
+            const confirmation = window.confirm(`Are you sure you want to delete the grade for ${studentName} in ${lesson} (${grade}) on ${date}?`);
+            if (confirmation) {
+                deleteGrade(gradeID);
+            }
+        }
+
+        // Function to handle deleting a grade
+        function deleteGrade(gradeID) {
+            // Implement the logic to delete the grade
+            fetch('/deleteGrade', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ gradeID }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload the page or update the table as needed
+                    location.reload();
+                } else {
+                    console.error('Error deleting grade:', data.message);
+                    // Handle error, e.g., show an alert to the user
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting grade:', error);
+                // Handle error, e.g., show an alert to the user
+            });
+        }
+
+        // Function to handle editing a grade
+        function editGrade(gradeID) {
+            // Implement the logic to navigate to the edit page
+            window.location.href = `/admin/edit?gradeID=${gradeID}`;
+        }
+
+        // Function to redirect to the new grade page
+        function redirectToNewGradePage() {
+            // Implement the logic to navigate to the new grade page
+            window.location.href = '/admin/newGrade';
+        }
+
+        // Function to format date as DD/MM/YYYY
+        function formatDate(dateString) {
+            const options = { day: 'numeric', month: 'numeric', year: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        // Initial render of the table
+        renderTable();
+    </script>
+</body>
+</html>

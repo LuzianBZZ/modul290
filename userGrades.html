@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Grades</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+
+        div {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #averageRow td {
+            font-weight: bold;
+            border-top: 2px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h2>User Information</h2>
+
+    <div>
+        <p>Job: <strong id="job"></strong></p>
+        <p>Name: <strong id="userName"></strong></p>
+        <p>Surname: <strong id="userSurname"></strong></p>
+        <p>Place: <strong id="userPlace"></strong></p>
+        <p>Birthday: <strong id="userBirthday"></strong></p>
+
+        <h2>User Grades</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Lesson</th>
+                    <th>Grade</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="gradesTableBody"></tbody>
+            <tfoot>
+                <tr id="averageRow">
+                    <td colspan="3">Average Grade: <span id="averageGrade"></span></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- DATA_PLACEHOLDER -->
+    <script>
+        // Accessing data from the injected JSON
+        const user = data.user;
+        const grades = data.grades;
+
+        // Display user information
+        document.getElementById('job').innerText = user.job;
+        document.getElementById('userName').innerText = user.name;
+        document.getElementById('userSurname').innerText = user.surname;
+        document.getElementById('userPlace').innerText = user.place;
+
+        // Format the birthday date
+        const birthdayDate = new Date(user.birthday);
+        const formattedBirthday = `${birthdayDate.getDate()}/${birthdayDate.getMonth() + 1}/${birthdayDate.getFullYear()}`;
+        document.getElementById('userBirthday').innerText = formattedBirthday;
+
+        // Display grades in the table
+        const gradesTableBody = document.getElementById('gradesTableBody');
+        grades.forEach(grade => {
+            const gradeDate = new Date(grade.date);
+            const formattedGradeDate = `${gradeDate.getDate()}/${gradeDate.getMonth() + 1}/${gradeDate.getFullYear()}`;
+
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${grade.lesson}</td><td>${grade.grade}</td><td>${formattedGradeDate}</td>`;
+            gradesTableBody.appendChild(row);
+        });
+
+        // Calculate and display average grade
+        const averageGrade = calculateAverageGrade(grades);
+        document.getElementById('averageGrade').innerText = averageGrade;
+
+        // Function to calculate the average grade
+        function calculateAverageGrade(grades) {
+            const totalGrades = grades.reduce((total, grade) => total + parseInt(grade.grade), 0);
+            const average = totalGrades / grades.length;
+            return average.toFixed(2); // Round to 2 decimal places
+        }
+    </script>
+</body>
+</html>

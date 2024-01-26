@@ -1,0 +1,114 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>/* Reset some default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background-color: #f9f9f9; /* Light background color */
+            color: #333; /* Dark text color */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        h2 {
+            color: #4CAF50; /* Green header text color */
+            margin-bottom: 20px; /* Add space below the header */
+        }
+        
+        form {
+            width: 50%;
+        }
+        
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #4CAF50; /* Green label text color */
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #4CAF50; /* Green border */
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        input[type="button"] {
+            background-color: #4CAF50; /* Green button background color */
+            color: #fff; /* White button text color */
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        input[type="button"]:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+        
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #45a049; /* Darker green on focus */
+        }
+        
+    </style>
+</head>
+<body>
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+
+        <input type="button" value="Login" onclick="login()">
+    </form>
+
+    <script>function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+    
+        const data = {
+            username: username,
+            password: password
+        };
+    
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to the test page upon successful login
+                window.location.href = '/userGrades';
+            } else {
+                console.error('Login failed:', data.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+    </script>
+</body>
+</html>
